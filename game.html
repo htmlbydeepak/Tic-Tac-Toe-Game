@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tic-Tac-Toe Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #89f7fe, #66a6ff);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+    }
+    .game {
+      text-align: center;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-gap: 10px;
+      margin: 20px auto;
+    }
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: #e3f2fd;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.5em;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: background 0.3s;
+    }
+    .cell:hover {
+      background: #bbdefb;
+    }
+    .confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+    .confetti-piece {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background: hsl(var(--hue), 100%, 50%);
+      animation: fall 3s linear infinite;
+    }
+    @keyframes fall {
+      0% { transform: translateY(0) rotate(0); opacity: 1; }
+      100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <div class="game">
+    <h1>Tic-Tac-Toe 🎮</h1>
+    <div class="board" id="board"></div>
+    <button onclick="resetGame()">Restart Game</button>
+  </div>
+  <div class="confetti" id="confetti"></div>
+
+  <script>
+    const board = document.getElementById('board');
+    const confettiContainer = document.getElementById('confetti');
+    let cells = Array(9).fill('');
+    let currentPlayer = 'X';
+    let gameActive = true;
+
+    function renderBoard() {
+      board.innerHTML = '';
+      cells.forEach((cell, index) => {
+        const div = document.createElement('div');
+        div.classList.add('cell');
+        div.textContent = cell;
+        div.onclick = () => handleClick(index);
+        board.appendChild(div);
+      });
+    }
+
+    function handleClick(index) {
+      if (!gameActive || cells[index] !== '') return;
+      cells[index] = currentPlayer;
+      renderBoard();
+      if (checkWin()) {
+        triggerConfetti();
+        alert(`🎉 Congratulations! Player ${currentPlayer} wins! 🎉`);
+        gameActive = false;
+        return;
+      }
+      if (cells.every(c => c !== '')) {
+        alert("😢 It's a draw! Try again!");
+        gameActive = false;
+        return;
+      }
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+    }
+
+    function checkWin() {
+      const wins = [
+        [0,1,2],[3,4,5],[6,7,8],
+        [0,3,6],[1,4,7],[2,5,8],
+        [0,4,8],[2,4,6]
+      ];
+      return wins.some(pattern => {
+        const [a,b,c] = pattern;
+        return cells[a] && cells[a] === cells[b] && cells[a] === cells[c];
+      });
+    }
+
+    function resetGame() {
+      cells = Array(9).fill('');
+      currentPlayer = 'X';
+      gameActive = true;
+      confettiContainer.innerHTML = '';
+      renderBoard();
+    }
+
+    function triggerConfetti() {
+      for (let i = 0; i < 100; i++) {
+        const piece = document.createElement('div');
+        piece.classList.add('confetti-piece');
+        piece.style.left = Math.random() * 100 + '%';
+        piece.style.setProperty('--hue', Math.floor(Math.random() * 360));
+        piece.style.animationDuration = (Math.random() * 2 + 2) + 's';
+        confettiContainer.appendChild(piece);
+        setTimeout(() => piece.remove(), 3000);
+      }
+    }
+
+    renderBoard();
+  </script>
+</body>
+</html>
